@@ -13,7 +13,7 @@
     "react": "16.9.0",
     "react-native": "0.61.5",
     "react-native-file-selector": "^1.0.0",
-    "react-native-ftp-client": "file:./../react-native-ftp-client"
+    "react-native-ftp-client": "file:../react-native-ftp-client"
   },
   "devDependencies": {
     "@babel/core": "^7.8.3",

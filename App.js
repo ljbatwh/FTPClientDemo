@@ -7,7 +7,6 @@
  */
 
 import React, {useEffect} from 'react';
-import {NativeEventEmitter} from 'react-native';
 import {
   SafeAreaView,
   StyleSheet,
@@ -23,7 +22,6 @@ import {Colors} from 'react-native/Libraries/NewAppScreen';
 
 import FTP from 'react-native-ftp-client';
 import RNFileSelector from 'react-native-file-selector';
-const FTPEmitter = new NativeEventEmitter(FTP);
 
 const App: () => React$Node = () => {
   const [ipValue, onIpChangeText] = React.useState('192.168.76.1');
@@ -34,7 +32,12 @@ const App: () => React$Node = () => {
   // const root_dir = '/userdata';
 
   useEffect(() => {
-    FTP.setup(ipValue, 21, 'anonymous', 'guest'); //Setup host
+    FTP.setup({
+      ip_address: ipValue,
+      port: 21,
+      username: 'anonymous',
+      password: 'guest',
+    }); //Setup host
   });
   const listFile = async path => {
     const res = await FTP.list(path);
@@ -48,7 +51,7 @@ const App: () => React$Node = () => {
           ' size:' +
           a.size +
           ' time:' +
-          a.timestamp.toString(),
+          a.timestamp.toISOString(),
       )
       .join('\n');
     onListChange(text);
@@ -72,22 +75,25 @@ const App: () => React$Node = () => {
         console.log('file selected: ' + path);
         try {
           let currentToken = '';
-          FTPEmitter.addListener('Progress', ({token, percentage}) => {
-            if (percentage === 0) {
-              onTokenChange(token);
-              console.log('start uploading : ' + token);
-              currentToken = token;
-            }
-            if (token !== currentToken) {
-              onProgressChange('token:' + token + ' != ' + currentToken);
-            } else {
-              onProgressChange(percentage + '%');
-              if (percentage >= 100) {
-                onTokenChange('');
-                listFile(root_dir);
+          const subscription = FTP.addProgressListener(
+            ({token, percentage}) => {
+              if (percentage === 0) {
+                onTokenChange(token);
+                console.log('start uploading : ' + token);
+                currentToken = token;
               }
-            }
-          });
+              if (token !== currentToken) {
+                onProgressChange('token:' + token + ' != ' + currentToken);
+              } else {
+                onProgressChange(percentage + '%');
+                if (percentage >= 100) {
+                  onTokenChange('');
+                  listFile(root_dir);
+                  subscription.remove();
+                }
+              }
+            },
+          );
           await FTP.uploadFile(path, root_dir + '/demo.bak');
         } catch (error) {
           console.log(error.message);
