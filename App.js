@@ -22,12 +22,16 @@ import {Colors} from 'react-native/Libraries/NewAppScreen';
 
 import FTP from 'react-native-ftp-client';
 import RNFileSelector from 'react-native-file-selector';
+import RNFS from 'react-native-fs';
 
 const App: () => React$Node = () => {
   const [ipValue, onIpChangeText] = React.useState('192.168.76.1');
   const [listValue, onListChange] = React.useState('List of FTP');
   const [tokenValue, onTokenChange] = React.useState('');
   const [progressValue, onProgressChange] = React.useState('');
+  const [downloadTokenValue, onDownloadTokenChange] = React.useState('');
+  const [downloadProgressValue, onDownloadProgressChange] = React.useState('');
+
   const root_dir = '/Memory Card - 1/';
   // const root_dir = '/userdata';
 
@@ -112,6 +116,60 @@ const App: () => React$Node = () => {
     onTokenChange('');
     listFile(root_dir);
   };
+
+  const downloadFile = async () => {
+    const filename = 'demo2.bak';
+    const dirPath = RNFS.DocumentDirectoryPath + '/';
+    const path = dirPath.replace('file://', '') + filename;
+    console.log('dir selected: ' + path);
+    if (await RNFS.exists(path)) {
+      await RNFS.unlink(path);
+    }
+    try {
+      let currentToken = '';
+      const subscription = FTP.addProgressListener(({token, percentage}) => {
+        if (percentage === 0) {
+          onDownloadTokenChange(token);
+          console.log('start download : ' + token);
+          currentToken = token;
+        }
+        if (token !== currentToken) {
+          onDownloadProgressChange('token:' + token + ' != ' + currentToken);
+        } else {
+          onDownloadProgressChange(percentage + '%');
+          if (percentage >= 100) {
+            onDownloadTokenChange('');
+            subscription.remove();
+            RNFS.exists(path).then(exist => {
+              onDownloadProgressChange(`${path} exist ${exist}`);
+              if (exist) {
+                try {
+                  RNFS.unlink(path);
+                } catch (e) {}
+              }
+            });
+          }
+        }
+      });
+      await FTP.downloadFile(path, root_dir + '/demo.bak');
+    } catch (error) {
+      console.log(error.message);
+      onDownloadProgressChange(error.message);
+      onDownloadTokenChange('');
+      RNFS.exists(path).then(exist => {
+        if (exist) {
+          try {
+            RNFS.unlink(path);
+          } catch (e) {}
+        }
+      });
+    }
+  };
+  const cancelDownload = async () => {
+    FTP.cancelDownloadFile(downloadTokenValue);
+    onDownloadProgressChange('Cancelled');
+    onDownloadTokenChange('');
+  };
   return (
     <>
       <StatusBar barStyle="dark-content" />
@@ -145,6 +203,18 @@ const App: () => React$Node = () => {
             <View style={styles.sectionContainer}>
               <Text style={styles.sectionTitle}>Demo delete</Text>
               <Button title="Delete" onPress={deleteFile} />
+            </View>
+            <View style={styles.sectionContainer}>
+              <Text style={styles.sectionTitle}>Demo download</Text>
+              <Text style={styles.sectionDescription}>
+                {downloadProgressValue}
+              </Text>
+              <Button title="Download" onPress={downloadFile} />
+              <Button
+                title="Cancel"
+                disabled={!downloadTokenValue}
+                onPress={cancelDownload}
+              />
             </View>
           </View>
         </ScrollView>

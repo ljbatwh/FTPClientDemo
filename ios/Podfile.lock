@@ -221,6 +221,8 @@ PODS:
   - RNFileSelector (1.0.0):
     - FileBrowser
     - React
+  - RNFS (2.16.6):
+    - React
   - RNFtpClient (1.0.0):
     - React
   - Yoga (1.14.0)
@@ -255,6 +257,7 @@ DEPENDENCIES:
   - ReactCommon/jscallinvoker (from `../node_modules/react-native/ReactCommon`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - RNFileSelector (from `../node_modules/react-native-file-selector/ios`)
+  - RNFS (from `../node_modules/react-native-fs`)
   - RNFtpClient (from `../node_modules/react-native-ftp-client/ios`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -315,6 +318,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   RNFileSelector:
     :path: "../node_modules/react-native-file-selector/ios"
+  RNFS:
+    :path: "../node_modules/react-native-fs"
   RNFtpClient:
     :path: "../node_modules/react-native-ftp-client/ios"
   Yoga:
@@ -353,6 +358,7 @@ SPEC CHECKSUMS:
   React-RCTVibration: a49a1f42bf8f5acf1c3e297097517c6b3af377ad
   ReactCommon: 198c7c8d3591f975e5431bec1b0b3b581aa1c5dd
   RNFileSelector: 898821102ce11fdd59ed87a1cc3200edb7192fd6
+  RNFS: 2bd9eb49dc82fa9676382f0585b992c424cd59df
   RNFtpClient: 9766f518d81a8c8b2041c36c03b5f49ece9dbe6c
   Yoga: f2a7cd4280bfe2cca5a7aed98ba0eb3d1310f18b
 
